@@ -1,5 +1,5 @@
 open Parser;;
-type result = NUMBER of int | STRING of string
+type result = NUMBER of int | STRING of string | BOOL of bool
 
 let rec repeat_string s n =
   if n <= 0 then "" else s ^ repeat_string s (n-1)  
@@ -18,10 +18,16 @@ let rec evaluate parser=
         | "*", STRING s1, NUMBER n2 -> STRING (repeat_string s1 n2) 
         | "*", NUMBER n1, STRING s2 -> STRING (repeat_string s2 n1) 
         | "/", NUMBER n1, NUMBER n2 -> NUMBER (n1 / n2)
+        | ">", NUMBER n1, NUMBER n2 -> BOOL (n1 > n2)
+        | ">=", NUMBER n1, NUMBER n2 -> BOOL (n1 >= n2)
+        | "<", NUMBER n1, NUMBER n2 ->  BOOL (n1 < n2)
+        | "<=", NUMBER n1, NUMBER n2 -> BOOL (n1 <= n2)
+        | "==", NUMBER n1, NUMBER n2 -> BOOL (n1 = n2)
         | _ -> raise (Failure "error")
 
 let print_result res = 
-  match res with 
+  (match res with 
   | NUMBER num -> print_int num
   | STRING s -> print_string s
-  ; print_newline ()
+  | BOOL b -> if b then print_string "true" else print_string "false")
+  ;print_newline ()

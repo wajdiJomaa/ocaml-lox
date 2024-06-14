@@ -29,5 +29,10 @@ let parse_sum tokens =
     let check x = match x with | PLUS | MINUS -> true | _ -> false in 
     binary_helper mult.ls mult.value parse_mult check 
 
-let parse tokens = let res = parse_sum tokens in res.value 
+let parse_comparasion tokens = 
+    let sum = parse_sum tokens in
+    let check x = match x with | LESS | LESSEQ | BIGGER | BIGGEREQ | EQ  -> true | _ -> false in 
+    binary_helper sum.ls sum.value parse_sum check 
+
+let parse tokens = let res = parse_comparasion tokens in res.value 
  

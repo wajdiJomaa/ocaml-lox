@@ -1,4 +1,6 @@
 type token_type = PLUS | MINUS | MULT | DIV | NUMBER of int | STRING of string | NONE
+                | BIGGER | BIGGEREQ | LESS | LESSEQ | EQ
+
 type token = { t_type : token_type ; length: int; lexeme: string; }
 
 
@@ -37,13 +39,26 @@ let get_string s =
 
 let get_token token s =
   match token with
-  | '+' ->  { t_type = PLUS ; length = 1; lexeme = "+" }
-  | '-' ->  { t_type = MINUS ; length = 1; lexeme = "-" }          
-  | ' ' | '\n' ->  { t_type = NONE ; length = 1; lexeme = "" }
-  | '*' -> { t_type = MULT; length = 1 ; lexeme= "*" }
-  | '/' -> { t_type = DIV; length = 1 ; lexeme=" /" }
-  | '"' -> get_string (remove_n  s 1)
-  | c -> if is_digit c then get_number s else raise (Failure "unknown token")
+    | '+' ->  { t_type = PLUS ; length = 1; lexeme = "+" }
+    | '-' ->  { t_type = MINUS ; length = 1; lexeme = "-" }          
+    | ' ' | '\n' ->  { t_type = NONE ; length = 1; lexeme = "" }
+    | '*' -> { t_type = MULT; length = 1 ; lexeme = "*" }
+    | '/' -> { t_type = DIV; length = 1 ; lexeme = "/" }
+
+    | '>' ->  if get_first (remove_n s 1) = '=' 
+        then { t_type = BIGGEREQ; length = 2; lexeme = ">="}
+        else { t_type = BIGGER; length = 1; lexeme = ">"}
+
+    | '<' -> if get_first (remove_n s 1) = '=' 
+      then { t_type = LESSEQ; length = 2; lexeme = "<="}
+      else { t_type = LESS; length = 1; lexeme = "<"}
+      
+    | '=' -> if get_first (remove_n s 1) = '=' 
+      then {t_type = EQ ; length = 2; lexeme="=="}
+      else raise (Failure "= not supported")
+
+    | '"' -> get_string (remove_n  s 1) 
+    | c -> if is_digit c then get_number s else raise (Failure "unknown token")
 
 let rec scan source =
   match source with
@@ -51,6 +66,3 @@ let rec scan source =
   | s ->  match get_token (get_first s) s with
           | { t_type = NONE; _} -> scan (remove_n s 1)
           | token ->  token :: scan (remove_n s token.length) 
-
-
-
